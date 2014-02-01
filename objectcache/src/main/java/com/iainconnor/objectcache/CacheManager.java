@@ -1,6 +1,7 @@
 package com.iainconnor.objectcache;
 
 import android.os.AsyncTask;
+import android.util.Log;
 import com.google.gson.Gson;
 
 import java.io.IOException;
@@ -118,6 +119,7 @@ public class CacheManager {
 	}
 
 	private <T> String getInternalKey ( String key, Class<T> objectClass ) {
+		Log.v("Cache", key + objectClass.getCanonicalName());
 		return key + objectClass.getCanonicalName();
 	}
 
