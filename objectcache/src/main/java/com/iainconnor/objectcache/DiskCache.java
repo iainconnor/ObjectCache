@@ -44,11 +44,11 @@ public class DiskCache {
 
 		try {
 			snapshot = diskLruCache.get(getHashOf(key));
-			if ( snapshot != null ) {
+			if (snapshot != null) {
 				found = true;
 			}
 		} finally {
-			if ( snapshot != null ) {
+			if (snapshot != null) {
 				snapshot.close();
 			}
 		}
@@ -111,6 +111,4 @@ public class DiskCache {
 			return string;
 		}
 	}
-
-
 }
