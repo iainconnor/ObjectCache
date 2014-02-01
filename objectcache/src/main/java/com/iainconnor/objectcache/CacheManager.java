@@ -119,7 +119,6 @@ public class CacheManager {
 	}
 
 	private <T> String getInternalKey ( String key, Class<T> objectClass ) {
-		Log.v("Cache", key + objectClass.getCanonicalName());
 		return key + objectClass.getCanonicalName();
 	}
 
@@ -264,6 +263,7 @@ public class CacheManager {
 		}
 
 		public boolean isExpired () {
+			Log.v("Cache", expiryTimeSeconds + ">= 0 && " + expiryTimestamp + " > " + (int) (System.currentTimeMillis() / 1000L));
 			return expiryTimeSeconds >= 0 && expiryTimestamp > (int) (System.currentTimeMillis() / 1000L);
 		}
 
