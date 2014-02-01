@@ -1,7 +1,6 @@
 package com.iainconnor.objectcache;
 
 import android.os.AsyncTask;
-import android.util.Log;
 import com.google.gson.Gson;
 
 import java.io.IOException;
@@ -263,8 +262,7 @@ public class CacheManager {
 		}
 
 		public boolean isExpired () {
-			Log.v("Cache", expiryTimeSeconds + ">= 0 && " + expiryTimestamp + " > " + (int) (System.currentTimeMillis() / 1000L));
-			return expiryTimeSeconds >= 0 && expiryTimestamp > (int) (System.currentTimeMillis() / 1000L);
+			return expiryTimeSeconds >= 0 && expiryTimestamp < (int) (System.currentTimeMillis() / 1000L);
 		}
 
 		public Object getPayload () {
