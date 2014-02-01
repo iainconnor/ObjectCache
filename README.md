@@ -9,6 +9,8 @@ Let this library wrap the work involved in doing so up for you, so you can get b
 
 Simply put, this library creates both a long-lived, on-disk (using the outstanding [DiskLruCache](https://github.com/JakeWharton/DiskLruCache) library) of JSON representations of your Objects (using the superb [GSON](https://code.google.com/p/google-gson/) library) and an in-memory, runtime cache of your Objects. You can optionally specify a time when those cache entries expire, and the goodness of cache-rush-mitigation is baked right into the crust.
 
+Original credit for the base of this project goes out to [anupcowkur/Reservoir](https://github.com/anupcowkur/Reservoir), but my application required a slightly more specific implementation.
+
 *NOTE:* Consider this untested.
 
 ## Installing in Gradle
@@ -43,7 +45,7 @@ First, you'll need to create an instance of `DiskCache ( File cacheDirectory, in
 
 ``` java
 String cachePath = context.getCacheDir().getPath();
-File cacheFile = File(cachePath + File.separator + BuildConfig.PACKAGE_NAME );
+File cacheFile = new File(cachePath + File.separator + BuildConfig.PACKAGE_NAME);
 
 DiskCache diskCache = new DiskCache(cacheFile, BuildConfig.VERSION_CODE, 1024 * 1024 * 10);
 ```
