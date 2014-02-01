@@ -27,7 +27,7 @@ Simply put, this library creates both a long-lived, on-disk (using the outstandi
 
 	``` groovy
 	dependencies {
-		compile 'com.iainconnor:objectcache:0.0.3-SNAPSHOT'
+		compile 'com.iainconnor:objectcache:0.0.4-SNAPSHOT'
 	}
 	```
 
