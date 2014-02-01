@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>com.iainconnor</groupId>
+  <artifactId>objectcache</artifactId>
+  <version>0.0.3-SNAPSHOT</version>
+  <versioning>
+    <versions>
+      <version>0.0.3-SNAPSHOT</version>
+    </versions>
+    <lastUpdated>20140201073523</lastUpdated>
+  </versioning>
+</metadata>

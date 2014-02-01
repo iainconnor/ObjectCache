@@ -1,0 +1,45 @@
+apply plugin: 'android-library'
+
+repositories {
+	mavenCentral()
+}
+
+android {
+	compileSdkVersion 19
+	buildToolsVersion "19.0.1"
+
+	defaultConfig {
+		minSdkVersion 8
+		targetSdkVersion 19
+		versionCode 1
+		versionName "1.0"
+	}
+	release {
+		runProguard false
+		proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+	}
+}
+
+apply plugin: 'maven'
+
+group = 'com.iainconnor'
+version = '0.0.3-SNAPSHOT'
+project.ext.description = "A simple cache for your objects."
+
+dependencies {
+	compile 'com.google.code.gson:gson:2.2.4'
+	compile 'com.jakewharton:disklrucache:2.0.2'
+}
+
+uploadArchives {
+	repositories {
+		mavenDeployer {
+			pom.project {
+				name project.getName()
+				description project.ext.description
+			}
+			repository url: 'file://' + new File(System.getProperty('user.home'), '.m2/repository').absolutePath
+			repository url: 'file://' + new File("./maven").absolutePath
+		}
+	}
+}
