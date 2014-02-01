@@ -49,24 +49,26 @@ public class CacheManager {
 		} else {
 			try {
 				String json = diskCache.getValue(internalKey);
-				CachedObject cachedObject = new Gson().fromJson(json, CachedObject.class);
-				if (!cachedObject.isExpired()) {
-					runtimeCache.put(internalKey, cachedObject);
-					result = (T) cachedObject.getPayload();
-				} else {
-					// To avoid cache rushing, we insert the value back in the cache with a longer expiry
-					// Presumably, whoever received this expiration result will have inserted a fresh value by now
-					putAsync(key, (T) cachedObject.getPayload(), CACHE_RUSH_SECONDS, new PutCallback() {
-						@Override
-						public void onSuccess () {
+				if (json != null) {
+					CachedObject cachedObject = new Gson().fromJson(json, CachedObject.class);
+					if (!cachedObject.isExpired()) {
+						runtimeCache.put(internalKey, cachedObject);
+						result = (T) cachedObject.getPayload();
+					} else {
+						// To avoid cache rushing, we insert the value back in the cache with a longer expiry
+						// Presumably, whoever received this expiration result will have inserted a fresh value by now
+						putAsync(key, (T) cachedObject.getPayload(), CACHE_RUSH_SECONDS, new PutCallback() {
+							@Override
+							public void onSuccess () {
 
-						}
+							}
 
-						@Override
-						public void onFailure ( Exception e ) {
+							@Override
+							public void onFailure ( Exception e ) {
 
-						}
-					});
+							}
+						});
+					}
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -163,24 +165,26 @@ public class CacheManager {
 			} else {
 				try {
 					String json = diskCache.getValue(internalKey);
-					CachedObject cachedObject = new Gson().fromJson(json, CachedObject.class);
+					if (json != null) {
+						CachedObject cachedObject = new Gson().fromJson(json, CachedObject.class);
 
-					if (!cachedObject.isExpired()) {
-						result = (T) cachedObject.getPayload();
-					} else {
-						// To avoid cache rushing, we insert the value back in the cache with a longer expiry
-						// Presumably, whoever received this expiration result will have inserted a fresh value by now
-						putAsync(key, (T) cachedObject.getPayload(), CACHE_RUSH_SECONDS, new PutCallback() {
-							@Override
-							public void onSuccess () {
+						if (!cachedObject.isExpired()) {
+							result = (T) cachedObject.getPayload();
+						} else {
+							// To avoid cache rushing, we insert the value back in the cache with a longer expiry
+							// Presumably, whoever received this expiration result will have inserted a fresh value by now
+							putAsync(key, (T) cachedObject.getPayload(), CACHE_RUSH_SECONDS, new PutCallback() {
+								@Override
+								public void onSuccess () {
 
-							}
+								}
 
-							@Override
-							public void onFailure ( Exception e ) {
+								@Override
+								public void onFailure ( Exception e ) {
 
-							}
-						});
+								}
+							});
+						}
 					}
 				} catch (Exception e) {
 					this.e = e;
