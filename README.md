@@ -69,7 +69,8 @@ cacheManager.put("myKeyExpiry", myExpiryObject, CacheManager.ExpiryTimes.ONE_WEE
 And retrieve it;
 
 ``` java
-MyObject myObject = cacheManager.get("myKey", MyObject.class);
+Type myObjectType = new TypeToken<MyObject>(){}.getType();
+MyObject myObject = cacheManager.get("myKey", MyObject.class, myObjectType);
 if ( myObject != null ) {
 	// Object was found!
 } else {
@@ -93,7 +94,7 @@ cacheManager.putAsync("myKeyExpiry", myExpiryObject, CacheManager.ExpiryTimes.ON
     }
 });
 
-cacheManager.getAsync("myKeyExpiry", myExpiryObject.class, new GetCallback() {
+cacheManager.getAsync("myKeyExpiry", myExpiryObject.class, myExpiryObjectType, new GetCallback() {
     @Override
     public void onSuccess ( ExpiryObject myObject ) {
 		if ( myObject != null ) {

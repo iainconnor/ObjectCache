@@ -1,10 +1,10 @@
 package com.iainconnor.objectcache;
 
 import android.os.AsyncTask;
-import android.util.Log;
 import com.google.gson.Gson;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 
 public class CacheManager {
@@ -40,7 +40,7 @@ public class CacheManager {
 	}
 
 	@SuppressWarnings ("unchecked")
-	public <T> T get ( String key, Class<T> objectClass ) {
+	public <T> T get ( String key, Class<T> objectClass, Type objectType ) {
 		T result = null;
 		String internalKey = getInternalKey(key, objectClass);
 
@@ -51,10 +51,8 @@ public class CacheManager {
 			try {
 				String json = diskCache.getValue(internalKey);
 				if (json != null) {
-					Log.v("CacheN", json);
-					CachedObject cachedObject = new Gson().fromJson(json, CachedObject.class);
+					CachedObject cachedObject = new Gson().fromJson(json, objectType);
 					if (!cachedObject.isExpired()) {
-						Log.v("Cache1", internalKey + ", " + json);
 						runtimeCache.put(internalKey, cachedObject);
 						result = (T) cachedObject.getPayload();
 					} else {
@@ -82,8 +80,8 @@ public class CacheManager {
 		return result;
 	}
 
-	public <T> void getAsync ( String key, Class<T> objectClass, GetCallback<T> getCallback ) {
-		new GetAsyncTask<T>(key, objectClass, getCallback).execute();
+	public <T> void getAsync ( String key, Class<T> objectClass, Type objectType, GetCallback<T> getCallback ) {
+		new GetAsyncTask<T>(key, objectClass, objectType, getCallback).execute();
 	}
 
 	public boolean put ( String key, Object object ) {
@@ -97,7 +95,6 @@ public class CacheManager {
 		try {
 			CachedObject cachedObject = new CachedObject(object, expiryTimeSeconds);
 			String json = new Gson().toJson(cachedObject);
-			Log.v("Cache2", internalKey + ", " + json);
 			runtimeCache.put(internalKey, cachedObject);
 			diskCache.setKeyValue(internalKey, json);
 			result = true;
@@ -149,12 +146,14 @@ public class CacheManager {
 	private class GetAsyncTask<T> extends AsyncTask<Void, Void, T> {
 		private final String key;
 		private final GetCallback<T> callback;
+		private final Type objectType;
 		private final Class<T> objectClass;
 		private Exception e;
 
-		private GetAsyncTask ( String key, Class<T> objectClass, GetCallback callback ) {
+		private GetAsyncTask ( String key, Class<T> objectClass, Type objectType, GetCallback callback ) {
 			this.callback = callback;
 			this.key = key;
+			this.objectType = objectType;
 			this.objectClass = objectClass;
 		}
 
@@ -170,7 +169,7 @@ public class CacheManager {
 				try {
 					String json = diskCache.getValue(internalKey);
 					if (json != null) {
-						CachedObject cachedObject = new Gson().fromJson(json, CachedObject.class);
+						CachedObject cachedObject = new Gson().fromJson(json, objectType);
 
 						if (!cachedObject.isExpired()) {
 							result = (T) cachedObject.getPayload();
@@ -231,7 +230,6 @@ public class CacheManager {
 			try {
 				CachedObject cachedObject = new CachedObject(payload, expiryTimeSeconds);
 				String json = new Gson().toJson(cachedObject);
-				Log.v("Cache3", internalKey + ", " + json);
 				runtimeCache.put(internalKey, cachedObject);
 				diskCache.setKeyValue(internalKey, json);
 			} catch (Exception e) {
