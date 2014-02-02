@@ -53,7 +53,7 @@ public class CacheManager {
 				if (json != null) {
 					CachedObject cachedObject = new Gson().fromJson(json, CachedObject.class);
 					if (!cachedObject.isExpired()) {
-						Log.v("Cache1", cachedObject.toString());
+						Log.v("Cache1", json);
 						runtimeCache.put(internalKey, cachedObject);
 						result = (T) cachedObject.getPayload();
 					} else {
@@ -96,7 +96,7 @@ public class CacheManager {
 		try {
 			CachedObject cachedObject = new CachedObject(object, expiryTimeSeconds);
 			String json = new Gson().toJson(cachedObject);
-			Log.v("Cache2", cachedObject.toString());
+			Log.v("Cache2", json);
 			runtimeCache.put(internalKey, cachedObject);
 			diskCache.setKeyValue(internalKey, json);
 			result = true;
@@ -230,7 +230,7 @@ public class CacheManager {
 			try {
 				CachedObject cachedObject = new CachedObject(payload, expiryTimeSeconds);
 				String json = new Gson().toJson(cachedObject);
-				Log.v("Cache3", cachedObject.toString());
+				Log.v("Cache3", json);
 				runtimeCache.put(internalKey, cachedObject);
 				diskCache.setKeyValue(internalKey, json);
 			} catch (Exception e) {
