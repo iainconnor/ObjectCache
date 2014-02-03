@@ -46,7 +46,7 @@ public class CacheManager {
 
 		CachedObject runtimeCachedObject = runtimeCache.get(internalKey);
 		if (runtimeCachedObject != null && !runtimeCachedObject.isExpired()) {
-			result = (T) runtimeCachedObject.getPayload();
+			result = (T) new Gson().fromJson(runtimeCachedObject.getPayload(), objectType);
 		} else {
 			try {
 				String json = diskCache.getValue(internalKey);
@@ -54,11 +54,11 @@ public class CacheManager {
 					CachedObject cachedObject = new Gson().fromJson(json, CachedObject.class);
 					if (!cachedObject.isExpired()) {
 						runtimeCache.put(internalKey, cachedObject);
-						result = (T) cachedObject.getPayload();
+						result = (T) new Gson().fromJson(cachedObject.getPayload(), objectType);
 					} else {
 						// To avoid cache rushing, we insert the value back in the cache with a longer expiry
 						// Presumably, whoever received this expiration result will have inserted a fresh value by now
-						putAsync(key, (T) cachedObject.getPayload(), CACHE_RUSH_SECONDS, new PutCallback() {
+						putAsync(key, (T) new Gson().fromJson(cachedObject.getPayload(), objectType), CACHE_RUSH_SECONDS, new PutCallback() {
 							@Override
 							public void onSuccess () {
 
@@ -93,7 +93,8 @@ public class CacheManager {
 		String internalKey = getInternalKey(key, object);
 
 		try {
-			CachedObject cachedObject = new CachedObject(object, expiryTimeSeconds);
+			String payloadJson = new Gson().toJson(object);
+			CachedObject cachedObject = new CachedObject(payloadJson, expiryTimeSeconds);
 			String json = new Gson().toJson(cachedObject);
 			runtimeCache.put(internalKey, cachedObject);
 			diskCache.setKeyValue(internalKey, json);
@@ -164,7 +165,7 @@ public class CacheManager {
 
 			CachedObject runtimeCachedObject = runtimeCache.get(internalKey);
 			if (runtimeCachedObject != null && !runtimeCachedObject.isExpired()) {
-				result = (T) runtimeCachedObject.getPayload();
+				result = (T) new Gson().fromJson(runtimeCachedObject.getPayload(), objectType);
 			} else {
 				try {
 					String json = diskCache.getValue(internalKey);
@@ -172,11 +173,11 @@ public class CacheManager {
 						CachedObject cachedObject = new Gson().fromJson(json, CachedObject.class);
 
 						if (!cachedObject.isExpired()) {
-							result = (T) cachedObject.getPayload();
+							result = (T) new Gson().fromJson(cachedObject.getPayload(), objectType);
 						} else {
 							// To avoid cache rushing, we insert the value back in the cache with a longer expiry
 							// Presumably, whoever received this expiration result will have inserted a fresh value by now
-							putAsync(key, (T) cachedObject.getPayload(), CACHE_RUSH_SECONDS, new PutCallback() {
+							putAsync(key, (T) new Gson().fromJson(cachedObject.getPayload(), objectType), CACHE_RUSH_SECONDS, new PutCallback() {
 								@Override
 								public void onSuccess () {
 
@@ -228,7 +229,8 @@ public class CacheManager {
 			String internalKey = getInternalKey(key, payload);
 
 			try {
-				CachedObject cachedObject = new CachedObject(payload, expiryTimeSeconds);
+				String payloadJson = new Gson().toJson(payload);
+				CachedObject cachedObject = new CachedObject(payloadJson, expiryTimeSeconds);
 				String json = new Gson().toJson(cachedObject);
 				runtimeCache.put(internalKey, cachedObject);
 				diskCache.setKeyValue(internalKey, json);
@@ -255,9 +257,9 @@ public class CacheManager {
 		private int expiryTimeSeconds;
 		private int expiryTimestamp;
 		private int creationTimestamp;
-		private Object payload;
+		private String payload;
 
-		public CachedObject ( Object payload, int expiryTimeSeconds ) {
+		public CachedObject ( String payload, int expiryTimeSeconds ) {
 			this.expiryTimeSeconds = expiryTimeSeconds <= 0 ? -1 : expiryTimeSeconds;
 			this.creationTimestamp = (int) (System.currentTimeMillis() / 1000L);
 			this.expiryTimestamp = expiryTimeSeconds <= 0 ? -1 : this.creationTimestamp + this.expiryTimeSeconds;
@@ -268,7 +270,7 @@ public class CacheManager {
 			return expiryTimeSeconds >= 0 && expiryTimestamp < (int) (System.currentTimeMillis() / 1000L);
 		}
 
-		public Object getPayload () {
+		public String getPayload () {
 			return payload;
 		}
 	}
