@@ -26,12 +26,11 @@ public class CacheManager {
 		runtimeCache = new HashMap<String, CachedObject>();
 	}
 
-	public <T> boolean exists ( String key, Class<T> objectClass ) {
+	public boolean exists ( String key ) {
 		boolean result = false;
-		String internalKey = getInternalKey(key, objectClass);
 
 		try {
-			result = diskCache.contains(internalKey);
+			result = diskCache.contains(key);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -41,20 +40,19 @@ public class CacheManager {
 
 	public Object get ( String key, Class objectClass, Type objectType ) {
 		Object result = null;
-		String internalKey = getInternalKey(key, objectClass);
 
-		CachedObject runtimeCachedObject = runtimeCache.get(internalKey);
+		CachedObject runtimeCachedObject = runtimeCache.get(key);
 		if (runtimeCachedObject != null && !runtimeCachedObject.isExpired()) {
 			result = new Gson().fromJson(runtimeCachedObject.getPayload(), objectType);
 		} else if (runtimeCachedObject != null && runtimeCachedObject.isSoftExpired()) {
 			result = new SoftCachedObject<Object>(new Gson().fromJson(runtimeCachedObject.getPayload(), objectType));
 		} else {
 			try {
-				String json = diskCache.getValue(internalKey);
+				String json = diskCache.getValue(key);
 				if (json != null) {
 					CachedObject cachedObject = new Gson().fromJson(json, CachedObject.class);
 					if (!cachedObject.isExpired()) {
-						runtimeCache.put(internalKey, cachedObject);
+						runtimeCache.put(key, cachedObject);
 						result = new Gson().fromJson(cachedObject.getPayload(), objectType);
 					} else {
 						if (cachedObject.isSoftExpired()) {
@@ -89,20 +87,27 @@ public class CacheManager {
 		new GetAsyncTask(key, objectClass, objectType, getCallback).execute();
 	}
 
+	public boolean unset ( String key ) {
+		return put(key, null, -1, false);
+	}
+
+	public void unsetAsync ( String key, PutCallback putCallback ) {
+		putAsync(key, null, -1, false, putCallback);
+	}
+
 	public boolean put ( String key, Object object ) {
 		return put(key, object, -1, false);
 	}
 
 	public boolean put ( String key, Object object, int expiryTimeSeconds, boolean allowSoftExpiry ) {
 		boolean result = false;
-		String internalKey = getInternalKey(key, object);
 
 		try {
 			String payloadJson = new Gson().toJson(object);
 			CachedObject cachedObject = new CachedObject(payloadJson, expiryTimeSeconds, allowSoftExpiry);
 			String json = new Gson().toJson(cachedObject);
-			runtimeCache.put(internalKey, cachedObject);
-			diskCache.setKeyValue(internalKey, json);
+			runtimeCache.put(key, cachedObject);
+			diskCache.setKeyValue(key, json);
 			result = true;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -118,14 +123,6 @@ public class CacheManager {
 
 	public void putAsync ( String key, Object object, int expiryTimeSeconds, boolean allowSoftExpiry, PutCallback putCallback ) {
 		new PutAsyncTask(key, object, expiryTimeSeconds, allowSoftExpiry, putCallback).execute();
-	}
-
-	private <T> String getInternalKey ( String key, T object ) {
-		return getInternalKey(key, object.getClass());
-	}
-
-	private <T> String getInternalKey ( String key, Class<T> objectClass ) {
-		return key + objectClass.getCanonicalName();
 	}
 
 	public enum ExpiryTimes {
@@ -166,22 +163,21 @@ public class CacheManager {
 		@Override
 		protected Object doInBackground ( Void... voids ) {
 			Object result = null;
-			String internalKey = getInternalKey(key, objectClass);
 
-			CachedObject runtimeCachedObject = runtimeCache.get(internalKey);
+			CachedObject runtimeCachedObject = runtimeCache.get(key);
 			if (runtimeCachedObject != null && !runtimeCachedObject.isExpired()) {
 				result = new Gson().fromJson(runtimeCachedObject.getPayload(), objectType);
 			} else if (runtimeCachedObject != null && runtimeCachedObject.isSoftExpired()) {
 				result = new SoftCachedObject<Object>(new Gson().fromJson(runtimeCachedObject.getPayload(), objectType));
 			} else {
 				try {
-					String json = diskCache.getValue(internalKey);
+					String json = diskCache.getValue(key);
 					if (json != null) {
 						CachedObject cachedObject = new Gson().fromJson(json, CachedObject.class);
 
 						if (!cachedObject.isExpired()) {
 							result = new Gson().fromJson(cachedObject.getPayload(), objectType);
-							runtimeCache.put(internalKey, cachedObject);
+							runtimeCache.put(key, cachedObject);
 						} else {
 							if (cachedObject.isSoftExpired()) {
 								result = new SoftCachedObject<Object>(new Gson().fromJson(cachedObject.getPayload(), objectType));
@@ -240,14 +236,12 @@ public class CacheManager {
 
 		@Override
 		protected Void doInBackground ( Void... voids ) {
-			String internalKey = getInternalKey(key, payload);
-
 			try {
 				String payloadJson = new Gson().toJson(payload);
 				CachedObject cachedObject = new CachedObject(payloadJson, expiryTimeSeconds, allowSoftExpiry);
 				String json = new Gson().toJson(cachedObject);
-				runtimeCache.put(internalKey, cachedObject);
-				diskCache.setKeyValue(internalKey, json);
+				runtimeCache.put(key, cachedObject);
+				diskCache.setKeyValue(key, json);
 			} catch (Exception e) {
 				this.e = e;
 			}

@@ -23,7 +23,7 @@ android {
 apply plugin: 'maven'
 
 group = 'com.iainconnor'
-version = '0.0.16-SNAPSHOT'
+version = '0.0.17-SNAPSHOT'
 project.ext.description = "A simple cache for your objects."
 
 dependencies {
