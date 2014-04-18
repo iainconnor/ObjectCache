@@ -14,7 +14,18 @@ public class DiskCache {
 	private final int VALUE_COUNT = 1;
 	private DiskLruCache diskLruCache;
 
-	public DiskCache ( File cacheDirectory, int appVersion, int cacheSizeKb ) throws IOException {
+	private File cacheDirectory;
+	private int appVersion;
+	private int cacheSizeKb;
+
+	public DiskCache ( File cacheDirectory, int appVersion, int cacheSizeKb )  throws IOException {
+		this.cacheDirectory=cacheDirectory;
+		this.appVersion=appVersion;
+		this.cacheSizeKb=cacheSizeKb;
+		open();
+	}
+
+	private void open() throws IOException{
 		diskLruCache = DiskLruCache.open(cacheDirectory, appVersion, VALUE_COUNT, cacheSizeKb <= 0 ? DEFAULT_CACHE_SIZE : cacheSizeKb);
 	}
 
@@ -81,6 +92,8 @@ public class DiskCache {
 
 	public void clearCache () throws IOException {
 		diskLruCache.delete();
+		//Open the cache again to use the new empty cache
+		open();
 	}
 
 	protected boolean writeValueToCache ( String value, DiskLruCache.Editor editor ) throws IOException {
