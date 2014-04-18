@@ -125,6 +125,11 @@ public class CacheManager {
 		new PutAsyncTask(key, object, expiryTimeSeconds, allowSoftExpiry, putCallback).execute();
 	}
 
+	public void clear() throws IOException {
+		runtimeCache.clear();
+		diskCache.clearCache();
+	}
+
 	public enum ExpiryTimes {
 		ONE_SECOND(1),
 		ONE_MINUTE(60),
