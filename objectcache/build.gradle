@@ -6,7 +6,7 @@ repositories {
 
 android {
 	compileSdkVersion 19
-	buildToolsVersion "19.0.1"
+	buildToolsVersion "19.1.0"
 
 	defaultConfig {
 		minSdkVersion 8
@@ -14,16 +14,12 @@ android {
 		versionCode 1
 		versionName "1.0"
 	}
-	release {
-		runProguard false
-		proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
-	}
 }
 
 apply plugin: 'maven'
 
 group = 'com.iainconnor'
-version = '0.0.17-SNAPSHOT'
+version = '0.0.18-SNAPSHOT'
 project.ext.description = "A simple cache for your objects."
 
 dependencies {

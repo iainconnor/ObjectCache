@@ -29,7 +29,7 @@ Original credit for the base of this project goes out to [anupcowkur/Reservoir](
 
 	``` groovy
 	dependencies {
-		compile 'com.iainconnor:objectcache:0.0.16-SNAPSHOT'
+		compile 'com.iainconnor:objectcache:0.0.18-SNAPSHOT'
 	}
 	```
 
